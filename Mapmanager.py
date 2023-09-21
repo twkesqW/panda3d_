@@ -1,6 +1,9 @@
 import json
 
 from direct.showbase.ShowBase import ShowBase
+from panda3d.core import CollisionBox, CollisionNode
+
+
 class Mapmanager():
     def __init__(self):
         self.model = 'mymodel/untitled.gltf'  # модель куба у файлі block.egg
@@ -11,24 +14,22 @@ class Mapmanager():
         self.addBlock((0, 9, 0))
         self.addBlock((1, 10, 0))
 
-        self.model = 'mymodel/penguin.gltf'
-        self.texture = "mymodel/Penguin_Albedo.png"
+    def addBlock(self, position):
         self.block = loader.loadModel(self.model)
-        self.block.setTexture(loader.loadTexture(self.texture))
-        self.block.setPos((0,8,0))
-        self.block.setColor(self.color)
-        self.block.reparentTo(self.land)
-
-
-    def addBlock(self,position):
-        self.block = loader.loadModel(self.model)
-        self.block.setTexture(loader.loadTexture(self.texture))
         self.block.setPos(position)
-        self.block.setColor(self.color)
         self.block.reparentTo(self.land)
+
+        blockSolid = CollisionBox((-1, -1, -1), (1, 1, 1))
+
+        blockNode = CollisionNode('block-collision-node')
+        blockNode.addSolid(blockSolid)
+        collider = self.block.attachNewNode(blockNode)
+
+        collider.setPythonTag('owner', self.block)
 
     def startNew(self):
         self.land = render.attachNewNode("Land")
+
 
     def makeMap(self):
         with open("map.json","r") as file:
